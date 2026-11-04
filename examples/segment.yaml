@@ -1,0 +1,13 @@
+apiVersion: matomo.m.crossplane.io/v1alpha1
+kind: Segment
+metadata:
+  name: returning-germany
+spec:
+  providerConfigRef:
+    name: default
+  forProvider:
+    name: Returning visitors from Germany
+    definition: visitCountry==de;visitorType==returning
+    autoArchive: true
+    enabledAllUsers: true
+    # idSite: 1   # omit to apply across all sites

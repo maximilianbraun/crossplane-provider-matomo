@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: matomo-creds
+  namespace: crossplane-system
+type: Opaque
+stringData:
+  token_auth: "REPLACE_WITH_MATOMO_SUPERUSER_TOKEN"
+---
+apiVersion: matomo.m.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: default
+spec:
+  url: https://analytics.example.com
+  credentials:
+    tokenAuthSecretRef:
+      namespace: crossplane-system
+      name: matomo-creds
+      key: token_auth

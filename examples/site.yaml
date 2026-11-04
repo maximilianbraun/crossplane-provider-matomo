@@ -1,0 +1,19 @@
+apiVersion: matomo.m.crossplane.io/v1alpha1
+kind: Site
+metadata:
+  name: example-site
+spec:
+  providerConfigRef:
+    name: default
+  forProvider:
+    siteName: Example Shop
+    urls:
+      - https://shop.example.com
+      - https://www.shop.example.com
+    type: website
+    ecommerce: true
+    currency: EUR
+    timezone: Europe/Berlin
+    excludedQueryParameters:
+      - gclid
+      - fbclid
