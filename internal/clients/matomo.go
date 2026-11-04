@@ -133,7 +133,7 @@ func (c *Cache) evictLocked(pcName string) {
 }
 
 func newMatomoClient(ctx context.Context, kube client.Client, pc *providerv1alpha1.ProviderConfig) (*Client, error) {
-	token, err := readSecretValue(ctx, kube, pc.Spec.Credentials.TokenAuthSecretRef)
+	token, err := ReadSecretValue(ctx, kube, pc.Spec.Credentials.TokenAuthSecretRef)
 	if err != nil {
 		return nil, fmt.Errorf("reading token_auth secret: %w", err)
 	}
@@ -157,7 +157,7 @@ func buildTLSConfig(ctx context.Context, kube client.Client, pc *providerv1alpha
 	}
 	cfg.InsecureSkipVerify = pc.Spec.TLS.InsecureSkipVerify //nolint:gosec // opt-in via ProviderConfig
 	if pc.Spec.TLS.CASecretRef != nil {
-		caPEM, err := readSecretValue(ctx, kube, *pc.Spec.TLS.CASecretRef)
+		caPEM, err := ReadSecretValue(ctx, kube, *pc.Spec.TLS.CASecretRef)
 		if err != nil {
 			return nil, fmt.Errorf("reading CA secret: %w", err)
 		}
@@ -170,7 +170,9 @@ func buildTLSConfig(ctx context.Context, kube client.Client, pc *providerv1alpha
 	return cfg, nil
 }
 
-func readSecretValue(ctx context.Context, kube client.Client, ref xpv1.SecretKeySelector) (string, error) {
+// ReadSecretValue reads a single key from a Kubernetes secret referenced by a
+// Crossplane SecretKeySelector.
+func ReadSecretValue(ctx context.Context, kube client.Client, ref xpv1.SecretKeySelector) (string, error) {
 	secret := &corev1.Secret{}
 	nn := types.NamespacedName{Namespace: ref.Namespace, Name: ref.Name}
 	if err := kube.Get(ctx, nn, secret); err != nil {

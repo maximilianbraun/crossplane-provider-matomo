@@ -5,6 +5,9 @@ import (
 
 	"github.com/maximilianbraun/provider-matomo/internal/clients"
 	"github.com/maximilianbraun/provider-matomo/internal/controller/providerconfig"
+	"github.com/maximilianbraun/provider-matomo/internal/controller/segment"
+	"github.com/maximilianbraun/provider-matomo/internal/controller/site"
+	"github.com/maximilianbraun/provider-matomo/internal/controller/token"
 )
 
 // Setup registers all controllers with the Manager.
@@ -13,8 +16,14 @@ func Setup(mgr ctrl.Manager, cache *clients.Cache) error {
 		return err
 	}
 
-	// Resource controllers (Site, Segment, Token) are registered here once
-	// implemented.
-	_ = cache
+	for _, setup := range []func(ctrl.Manager, *clients.Cache) error{
+		site.Setup,
+		segment.Setup,
+		token.Setup,
+	} {
+		if err := setup(mgr, cache); err != nil {
+			return err
+		}
+	}
 	return nil
 }
