@@ -39,8 +39,8 @@ jobs:
         id: v
         run: echo "version=${{ github.event.inputs.version || github.ref_name }}" >> "$GITHUB_OUTPUT"
 
-      - name: Build
-        run: make -j2 build VERSION=${{ steps.v.outputs.version }}
+      - name: Build (all platforms)
+        run: make -j2 build.all VERSION=${{ steps.v.outputs.version }}
 
       - name: Publish package to ghcr
-        run: make -j2 publish VERSION=${{ steps.v.outputs.version }}
+        run: make publish VERSION=${{ steps.v.outputs.version }}
