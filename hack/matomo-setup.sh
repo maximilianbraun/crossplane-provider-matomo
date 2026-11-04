@@ -19,13 +19,25 @@ COMPOSE="${COMPOSE:-docker compose -f docker-compose.e2e.yml}"
 JAR="$(mktemp)"
 B="$URL/index.php"
 
-curljar() { curl -fsS -c "$JAR" -b "$JAR" -L "$@"; }
+# Installer steps are best-effort (no -f): Matomo can 500 transiently during
+# first-boot warmup, and the real success gate is the token verification at the
+# end. The verify curl below keeps -f.
+curljar() { curl -sS -c "$JAR" -b "$JAR" -L "$@"; }
 
 echo "waiting for Matomo at $URL ..."
 for i in $(seq 1 60); do
-  [ "$(curl -s -o /dev/null -w '%{http_code}' "$URL/" || true)" = "200" ] && break
+  [ "$(curl -s -o /dev/null -w '%{http_code}' "$URL/index.php?action=welcome&module=Installation" || true)" = "200" ] && break
   sleep 3
 done
+sleep 3
+
+# Walk the installer in order under one cookie jar. Matomo's installer is a
+# session state machine: skipping welcome/systemCheck/trackingCode leaves the
+# install unfinalized, and the Reporting API then keeps serving the installer
+# page instead of JSON.
+echo "installer: welcome + systemCheck"
+curljar "$B?action=welcome&module=Installation" -o /dev/null
+curljar "$B?action=systemCheck&module=Installation" -o /dev/null
 
 echo "installer: database setup"
 curljar "$B?action=databaseSetup&module=Installation" \
@@ -57,7 +69,16 @@ curljar "$B?action=firstWebsiteSetup&module=Installation" \
   --data-urlencode "ecommerce=0" \
   --data-urlencode "submit=Next" -o /dev/null
 
+echo "installer: tracking code + finish"
+curljar "$B?action=trackingCode&module=Installation" -o /dev/null
 curljar "$B?action=finished&module=Installation" -o /dev/null || true
+
+# Finalize: the web installer marks completion by clearing this flag from
+# config.ini.php. A scripted GET of 'finished' doesn't always clear it, leaving
+# Matomo in installer mode (the Reporting API then serves the installer page),
+# so clear it deterministically.
+echo "finalizing install"
+$COMPOSE exec -T matomo sh -c "sed -i '/installation_in_progress/d' /var/www/html/config/config.ini.php"
 
 echo "seeding superuser API token"
 SALT="$($COMPOSE exec -T matomo sh -c "grep -E '^salt' /var/www/html/config/config.ini.php" | sed -E 's/.*= *"([^"]+)".*/\1/')"

@@ -79,4 +79,16 @@ test-e2e: e2e-up
 	set -a; eval "$$(bash hack/matomo-setup.sh | grep -E '^MATOMO_(URL|TOKEN|ADMIN_PASS)=')"; set +a; \
 	$(GO) test -tags e2e ./internal/controller/... -run E2E -v
 
-.PHONY: submodules fallthrough run e2e-up e2e-down test-e2e
+# ====================================================================================
+# Local out-of-cluster dev loop (kind + dockerized Matomo). See hack/local-dev.sh.
+
+dev-up:
+	bash hack/local-dev.sh up
+
+dev-run:
+	bash hack/local-dev.sh run
+
+dev-down:
+	bash hack/local-dev.sh down
+
+.PHONY: submodules fallthrough run e2e-up e2e-down test-e2e dev-up dev-run dev-down
