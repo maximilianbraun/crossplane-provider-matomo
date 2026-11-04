@@ -29,21 +29,38 @@ type Client struct {
 	httpClient *http.Client
 }
 
+// NewClient builds a Matomo client for a base URL and token_auth using the
+// default HTTP transport. Useful for tests and ad-hoc callers; the controllers
+// build clients from a ProviderConfig via the Cache.
+func NewClient(baseURL, tokenAuth string) *Client {
+	return &Client{
+		baseURL:    baseURL,
+		tokenAuth:  tokenAuth,
+		httpClient: &http.Client{},
+	}
+}
+
 // Call invokes a Matomo API method (e.g. "SitesManager.addSite") with the
 // given parameters and returns the raw JSON response. module=API,
-// format=JSON and token_auth are added automatically. Params are sent as a
-// POST body so the token never lands in a URL or server log.
+// format=JSON and the method go in the query string along with the caller's
+// params; token_auth is sent in the POST body so it never lands in a URL or
+// server log. Matomo rejects idSite (and similar) when sent in the POST body
+// ("An unexpected website was found in the request"), so all method params
+// must travel in the query string.
 func (c *Client) Call(ctx context.Context, method string, params url.Values) (json.RawMessage, error) {
-	if params == nil {
-		params = url.Values{}
+	q := url.Values{}
+	for k, vs := range params {
+		for _, v := range vs {
+			q.Add(k, v)
+		}
 	}
-	params.Set("module", "API")
-	params.Set("method", method)
-	params.Set("format", "JSON")
-	params.Set("token_auth", c.tokenAuth)
+	q.Set("module", "API")
+	q.Set("method", method)
+	q.Set("format", "JSON")
 
-	endpoint := strings.TrimRight(c.baseURL, "/") + "/index.php"
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewBufferString(params.Encode()))
+	endpoint := strings.TrimRight(c.baseURL, "/") + "/index.php?" + q.Encode()
+	reqBody := url.Values{"token_auth": {c.tokenAuth}}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewBufferString(reqBody.Encode()))
 	if err != nil {
 		return nil, fmt.Errorf("building request for %s: %w", method, err)
 	}
@@ -133,7 +150,7 @@ func (c *Cache) evictLocked(pcName string) {
 }
 
 func newMatomoClient(ctx context.Context, kube client.Client, pc *providerv1alpha1.ProviderConfig) (*Client, error) {
-	token, err := readSecretValue(ctx, kube, pc.Spec.Credentials.TokenAuthSecretRef)
+	token, err := ReadSecretValue(ctx, kube, pc.Spec.Credentials.TokenAuthSecretRef)
 	if err != nil {
 		return nil, fmt.Errorf("reading token_auth secret: %w", err)
 	}
@@ -157,7 +174,7 @@ func buildTLSConfig(ctx context.Context, kube client.Client, pc *providerv1alpha
 	}
 	cfg.InsecureSkipVerify = pc.Spec.TLS.InsecureSkipVerify //nolint:gosec // opt-in via ProviderConfig
 	if pc.Spec.TLS.CASecretRef != nil {
-		caPEM, err := readSecretValue(ctx, kube, *pc.Spec.TLS.CASecretRef)
+		caPEM, err := ReadSecretValue(ctx, kube, *pc.Spec.TLS.CASecretRef)
 		if err != nil {
 			return nil, fmt.Errorf("reading CA secret: %w", err)
 		}
@@ -170,7 +187,9 @@ func buildTLSConfig(ctx context.Context, kube client.Client, pc *providerv1alpha
 	return cfg, nil
 }
 
-func readSecretValue(ctx context.Context, kube client.Client, ref xpv1.SecretKeySelector) (string, error) {
+// ReadSecretValue reads a single key from a Kubernetes secret referenced by a
+// Crossplane SecretKeySelector.
+func ReadSecretValue(ctx context.Context, kube client.Client, ref xpv1.SecretKeySelector) (string, error) {
 	secret := &corev1.Secret{}
 	nn := types.NamespacedName{Namespace: ref.Namespace, Name: ref.Name}
 	if err := kube.Get(ctx, nn, secret); err != nil {
