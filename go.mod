@@ -1,4 +1,4 @@
-module github.com/maximilianbraun/provider-matomo
+module github.com/maximilianbraun/crossplane-provider-matomo
 
 go 1.26.2
 

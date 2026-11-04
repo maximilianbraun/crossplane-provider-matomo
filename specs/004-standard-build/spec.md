@@ -11,7 +11,7 @@ with the upstream Crossplane build system — the `build/` git submodule and
 - **`build/` submodule** → `github.com/crossplane/build` (pinned).
 - **`Makefile`** includes `common.mk` / `output.mk` / `golang.mk` /
   `k8s_tools.mk` / `imagelight.mk` / `xpkg.mk`. Project vars:
-  `PROJECT_REPO=github.com/maximilianbraun/provider-matomo`,
+  `PROJECT_REPO=github.com/maximilianbraun/crossplane-provider-matomo`,
   `PLATFORMS=linux_amd64 linux_arm64`, `IMAGES=provider-matomo`,
   `XPKG_REG_ORGS=ghcr.io/maximilianbraun`, `XPKGS=provider-matomo`,
   `CROSSPLANE_CLI_VERSION=v2.3.4`. Custom e2e convenience targets

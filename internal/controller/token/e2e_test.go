@@ -15,8 +15,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/maximilianbraun/provider-matomo/apis/v1alpha1"
-	"github.com/maximilianbraun/provider-matomo/internal/clients"
+	"github.com/maximilianbraun/crossplane-provider-matomo/apis/v1alpha1"
+	"github.com/maximilianbraun/crossplane-provider-matomo/internal/clients"
 )
 
 func TestE2E_TokenMintAuthenticates(t *testing.T) {

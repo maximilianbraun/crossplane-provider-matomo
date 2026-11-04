@@ -13,7 +13,7 @@ import (
 
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 
-	"github.com/maximilianbraun/provider-matomo/apis/v1alpha1"
+	"github.com/maximilianbraun/crossplane-provider-matomo/apis/v1alpha1"
 )
 
 type fakeCaller struct {

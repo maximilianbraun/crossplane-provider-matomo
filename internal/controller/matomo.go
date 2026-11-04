@@ -3,11 +3,11 @@ package controller
 import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/maximilianbraun/provider-matomo/internal/clients"
-	"github.com/maximilianbraun/provider-matomo/internal/controller/providerconfig"
-	"github.com/maximilianbraun/provider-matomo/internal/controller/segment"
-	"github.com/maximilianbraun/provider-matomo/internal/controller/site"
-	"github.com/maximilianbraun/provider-matomo/internal/controller/token"
+	"github.com/maximilianbraun/crossplane-provider-matomo/internal/clients"
+	"github.com/maximilianbraun/crossplane-provider-matomo/internal/controller/providerconfig"
+	"github.com/maximilianbraun/crossplane-provider-matomo/internal/controller/segment"
+	"github.com/maximilianbraun/crossplane-provider-matomo/internal/controller/site"
+	"github.com/maximilianbraun/crossplane-provider-matomo/internal/controller/token"
 )
 
 // Setup registers all controllers with the Manager.

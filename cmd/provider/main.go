@@ -11,9 +11,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	"github.com/maximilianbraun/provider-matomo/apis/v1alpha1"
-	"github.com/maximilianbraun/provider-matomo/internal/clients"
-	"github.com/maximilianbraun/provider-matomo/internal/controller"
+	"github.com/maximilianbraun/crossplane-provider-matomo/apis/v1alpha1"
+	"github.com/maximilianbraun/crossplane-provider-matomo/internal/clients"
+	"github.com/maximilianbraun/crossplane-provider-matomo/internal/controller"
 )
 
 func main() {
