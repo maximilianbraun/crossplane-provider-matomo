@@ -55,6 +55,12 @@ tidy:
 docker-build:
 	docker build -t $(IMG) .
 
+# xpkg builds the Crossplane provider package into provider-matomo.xpkg.
+# Requires the crossplane CLI (https://docs.crossplane.io/latest/cli/).
+.PHONY: xpkg
+xpkg: generate
+	crossplane xpkg build --package-root=package --package-file=provider-matomo.xpkg
+
 .PHONY: docker-push
 docker-push:
 	docker push $(IMG)

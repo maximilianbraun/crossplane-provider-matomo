@@ -13,6 +13,14 @@ API group: `matomo.m.crossplane.io/v1alpha1`.
 
 ## Quick start
 
+Install the provider (published on tag via the `release` workflow):
+
+```sh
+crossplane xpkg install provider ghcr.io/maximilianbraun/provider-matomo:<tag>
+```
+
+Then configure it and create resources:
+
 ```sh
 kubectl apply -f examples/providerconfig.yaml
 kubectl apply -f examples/site.yaml

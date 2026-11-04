@@ -4,4 +4,4 @@ metadata:
   name: provider-matomo
 spec:
   controller:
-    image: ghcr.io/maximilianbraun/provider-matomo:latest
+    image: ghcr.io/maximilianbraun/provider-matomo-controller:latest

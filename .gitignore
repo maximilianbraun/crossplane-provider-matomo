@@ -34,3 +34,6 @@ site/
 
 # Provider binary
 provider
+
+# Crossplane package build artifact
+*.xpkg
