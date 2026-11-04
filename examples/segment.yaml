@@ -7,7 +7,7 @@ spec:
     name: default
   forProvider:
     name: Returning visitors from Germany
-    definition: visitCountry==de;visitorType==returning
+    definition: countryCode==de;visitorType==returning
     autoArchive: true
     enabledAllUsers: true
     # idSite: 1   # omit to apply across all sites

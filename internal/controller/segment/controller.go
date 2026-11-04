@@ -56,11 +56,11 @@ type external struct {
 
 // matomoSegment mirrors the subset of SegmentEditor.get we reconcile.
 type matomoSegment struct {
-	Name             string `json:"name"`
-	Definition       string `json:"definition"`
-	EnableOnlyIDSite string `json:"enable_only_idsite"`
-	AutoArchive      string `json:"auto_archive"`
-	EnableAllUsers   string `json:"enable_all_users"`
+	Name             string      `json:"name"`
+	Definition       string      `json:"definition"`
+	EnableOnlyIDSite json.Number `json:"enable_only_idsite"`
+	AutoArchive      json.Number `json:"auto_archive"`
+	EnableAllUsers   json.Number `json:"enable_all_users"`
 }
 
 func (e *external) Observe(ctx context.Context, mg *v1alpha1.Segment) (managed.ExternalObservation, error) {
@@ -158,13 +158,13 @@ func segmentUpToDate(p v1alpha1.SegmentParameters, s matomoSegment) bool {
 	if p.Definition != s.Definition {
 		return false
 	}
-	if p.IDSite != nil && strconv.Itoa(*p.IDSite) != s.EnableOnlyIDSite {
+	if p.IDSite != nil && strconv.Itoa(*p.IDSite) != s.EnableOnlyIDSite.String() {
 		return false
 	}
-	if p.AutoArchive != nil && b2s(*p.AutoArchive) != s.AutoArchive {
+	if p.AutoArchive != nil && b2s(*p.AutoArchive) != s.AutoArchive.String() {
 		return false
 	}
-	if p.EnabledAllUsers != nil && b2s(*p.EnabledAllUsers) != s.EnableAllUsers {
+	if p.EnabledAllUsers != nil && b2s(*p.EnabledAllUsers) != s.EnableAllUsers.String() {
 		return false
 	}
 	return true

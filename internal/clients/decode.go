@@ -66,6 +66,11 @@ func IsNotFound(err error) bool {
 		"not found",
 		"doesn't exist",
 		"does not exist",
+		// Matomo's SitesManager.getSiteFromId returns this for a missing/invalid
+		// site id rather than a plain "not found".
+		"an unexpected website was found in the request",
+		// SegmentEditor.get on a (soft-)deleted segment.
+		"marked as deleted",
 	} {
 		if strings.Contains(msg, needle) {
 			return true

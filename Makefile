@@ -28,6 +28,21 @@ build:
 test:
 	$(GO) test ./... -coverprofile cover.out
 
+.PHONY: e2e-up
+e2e-up:
+	docker compose -f docker-compose.e2e.yml up -d
+
+.PHONY: e2e-down
+e2e-down:
+	docker compose -f docker-compose.e2e.yml down -v
+
+# test-e2e brings up Matomo, bootstraps it, and runs the e2e-tagged tests
+# against it. Run `make e2e-down` afterwards to clean up.
+.PHONY: test-e2e
+test-e2e: e2e-up
+	set -a; eval "$$(bash hack/matomo-setup.sh | grep -E '^MATOMO_(URL|TOKEN|ADMIN_PASS)=')"; set +a; \
+	$(GO) test -tags e2e ./internal/controller/... -run E2E -v
+
 .PHONY: lint
 lint:
 	golangci-lint run ./...

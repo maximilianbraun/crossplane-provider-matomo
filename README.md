@@ -21,6 +21,26 @@ kubectl apply -f examples/site.yaml
 See [`examples/`](examples/) for `ProviderConfig`, `Site`, `Segment`, and
 `Token` manifests, and [`CLAUDE.md`](CLAUDE.md) for the development workflow.
 
+## Testing
+
+Unit tests (no Matomo needed):
+
+```sh
+make test
+```
+
+End-to-end against a real, dockerized Matomo (client-level — drives the
+controllers' external clients against a live instance, no cluster):
+
+```sh
+make test-e2e    # compose up + bootstrap + e2e tests
+make e2e-down    # clean up
+```
+
+The `e2e` GitHub Actions workflow runs the same flow on every push/PR to `main`.
+e2e tests are gated behind the `e2e` build tag, so they never run in the normal
+unit suite.
+
 ## Status
 
 Site, Segment, and Token controllers implemented (Observe/Create/Update/Delete)

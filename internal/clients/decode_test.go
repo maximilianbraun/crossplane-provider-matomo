@@ -55,6 +55,13 @@ func TestIsNotFound(t *testing.T) {
 	if !IsNotFound(errors.New("matomo API error: The requested website id = '5' couldn't be found")) {
 		t.Fatal("expected not-found match")
 	}
+	// Quirks discovered via e2e against real Matomo.
+	if !IsNotFound(errors.New("matomo API error: An unexpected website was found in the request: website id was set to '4' .")) {
+		t.Fatal("expected site not-found match")
+	}
+	if !IsNotFound(errors.New("matomo API error: This segment is marked as deleted. ")) {
+		t.Fatal("expected deleted-segment match")
+	}
 	if IsNotFound(errors.New("matomo API error: You can't access this resource")) {
 		t.Fatal("unexpected not-found match")
 	}
