@@ -1,61 +1,94 @@
-PROVIDER = provider-matomo
-BINARY = $(PROVIDER)
-IMG ?= ghcr.io/maximilianbraun/$(PROVIDER):latest
+# ====================================================================================
+# Setup Project
+PROJECT_NAME := provider-matomo
+PROJECT_REPO := github.com/maximilianbraun/$(PROJECT_NAME)
 
-GO := go
-LOCALBIN ?= $(shell pwd)/bin
-CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
-CONTROLLER_TOOLS_VERSION ?= v0.20.1
-ANGRYJET_VERSION ?= v0.0.0-20251017183449-dd4517244339
+PLATFORMS ?= linux_amd64 linux_arm64
+-include build/makelib/common.mk
 
-.PHONY: all
-all: generate build
+# ====================================================================================
+# Setup Output
 
-.PHONY: generate
-generate: controller-gen
-	"$(CONTROLLER_GEN)" object:headerFile="hack/boilerplate.go.txt" paths="./apis/..."
-	"$(CONTROLLER_GEN)" crd paths="./apis/..." output:crd:artifacts:config=package/crds
-	$(GO) run github.com/crossplane/crossplane-tools/cmd/angryjet@$(ANGRYJET_VERSION) generate-methodsets --header-file=hack/boilerplate.go.txt ./apis/...
+-include build/makelib/output.mk
 
-.PHONY: manifests
-manifests: generate
+# ====================================================================================
+# Setup Go
 
-.PHONY: build
-build:
-	$(GO) build -o bin/$(BINARY) ./cmd/provider/
+GOTOOLCHAIN ?= go$(shell awk '$$1 == "go" { v = $$2; if (v ~ /^[0-9]+\.[0-9]+$$/) v = v ".0"; print v; exit }' go.mod)
+export GOTOOLCHAIN
 
-.PHONY: test
-test:
-	$(GO) test ./... -coverprofile cover.out
+NPROCS ?= 1
+GO_TEST_PARALLEL := $(shell echo $$(( $(NPROCS) / 2 )))
+GO_STATIC_PACKAGES = $(GO_PROJECT)/cmd/provider
+GO_LDFLAGS += -X $(GO_PROJECT)/internal/version.Version=$(VERSION)
+GO_SUBDIRS += cmd internal apis
+GO111MODULE = on
+GOLANGCILINT_VERSION = 2.12.2
+-include build/makelib/golang.mk
 
-.PHONY: lint
-lint:
-	golangci-lint run ./...
+# ====================================================================================
+# Setup Kubernetes tools
 
-.PHONY: tidy
-tidy:
-	$(GO) mod tidy
+CROSSPLANE_CLI_VERSION ?= v2.3.4
+-include build/makelib/k8s_tools.mk
 
-.PHONY: docker-build
-docker-build:
-	docker build -t $(IMG) .
+# ====================================================================================
+# Setup Images
 
-.PHONY: docker-push
-docker-push:
-	docker push $(IMG)
+IMAGES = provider-matomo
+-include build/makelib/imagelight.mk
 
-.PHONY: dev
-dev: generate build
-	./bin/$(BINARY) --debug
+# ====================================================================================
+# Setup XPKG
 
-.PHONY: clean
-clean:
-	rm -rf bin/ package/crds/
+XPKG_REG_ORGS ?= ghcr.io/maximilianbraun
+XPKG_REG_ORGS_NO_PROMOTE ?= ghcr.io/maximilianbraun
+XPKGS = provider-matomo
+-include build/makelib/xpkg.mk
 
-$(LOCALBIN):
-	mkdir -p "$(LOCALBIN)"
+# Force image building prior to xpkg build so the image is present in the daemon.
+xpkg.build.provider-matomo: do.build.images
 
-.PHONY: controller-gen
-controller-gen: $(CONTROLLER_GEN)
-$(CONTROLLER_GEN): $(LOCALBIN)
-	GOBIN="$(LOCALBIN)" $(GO) install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
+fallthrough: submodules
+	@echo Initial setup complete. Running make again . . .
+	@make
+
+# Update the submodules, such as the common build scripts.
+submodules:
+	@git submodule sync
+	@git submodule update --init --recursive
+
+build.init: $(CROSSPLANE_CLI)
+
+# Run the provider locally out-of-cluster.
+run: go.build
+	@$(INFO) Running Crossplane provider locally out-of-cluster . . .
+	$(GO_OUT_DIR)/provider --debug
+
+# ====================================================================================
+# End-to-end (client-level) tests against a dockerized Matomo.
+# Independent of the makelib integration-test machinery.
+
+e2e-up:
+	docker compose -f docker-compose.e2e.yml up -d
+
+e2e-down:
+	docker compose -f docker-compose.e2e.yml down -v
+
+test-e2e: e2e-up
+	set -a; eval "$$(bash hack/matomo-setup.sh | grep -E '^MATOMO_(URL|TOKEN|ADMIN_PASS)=')"; set +a; \
+	$(GO) test -tags e2e ./internal/controller/... -run E2E -v
+
+# ====================================================================================
+# Local out-of-cluster dev loop (kind + dockerized Matomo). See hack/local-dev.sh.
+
+dev-up:
+	bash hack/local-dev.sh up
+
+dev-run:
+	bash hack/local-dev.sh run
+
+dev-down:
+	bash hack/local-dev.sh down
+
+.PHONY: submodules fallthrough run e2e-up e2e-down test-e2e dev-up dev-run dev-down

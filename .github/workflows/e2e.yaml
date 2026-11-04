@@ -1,0 +1,35 @@
+name: e2e
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Start Matomo + MariaDB
+        run: docker compose -f docker-compose.e2e.yml up -d
+
+      - name: Bootstrap Matomo (install + seed token)
+        run: bash hack/matomo-setup.sh
+        # Appends MATOMO_URL / MATOMO_TOKEN / MATOMO_ADMIN_PASS to $GITHUB_ENV.
+
+      - name: Run e2e tests
+        run: go test -tags e2e ./internal/controller/... -run E2E -v
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.e2e.yml down -v
