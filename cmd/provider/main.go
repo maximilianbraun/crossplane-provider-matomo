@@ -20,7 +20,8 @@ func main() {
 	var (
 		app         = kingpin.New("provider-matomo", "Crossplane Matomo Provider").DefaultEnvars()
 		debug       = app.Flag("debug", "Run with debug logging.").Short('d').Bool()
-		metricsAddr = app.Flag("metrics-bind-address", "Address the metrics endpoint binds to; '0' disables it.").Default(":8080").String()
+		metricsAddr = app.Flag("metrics-bind-address",
+			"Address the metrics endpoint binds to; '0' disables it.").Default(":8080").String()
 	)
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
