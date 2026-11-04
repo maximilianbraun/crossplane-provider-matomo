@@ -37,3 +37,8 @@ provider
 
 # Crossplane package build artifact
 *.xpkg
+
+# makelib build outputs
+_output/
+.cache/
+.work/

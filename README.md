@@ -29,6 +29,23 @@ kubectl apply -f examples/site.yaml
 See [`examples/`](examples/) for `ProviderConfig`, `Site`, `Segment`, and
 `Token` manifests, and [`CLAUDE.md`](CLAUDE.md) for the development workflow.
 
+## Build
+
+Uses the standard Crossplane build system (the `build/` git submodule):
+
+```sh
+git clone --recurse-submodules https://github.com/maximilianbraun/provider-matomo
+# or, if already cloned: make submodules
+
+make generate     # CRDs + deepcopy + managed-resource methods
+make build        # binaries, provider image, and xpkg (needs docker buildx)
+make reviewable   # lint + generate + tidy, before opening a PR
+```
+
+The provider is packaged as a single self-contained xpkg with the controller
+runtime embedded; `make publish VERSION=vX.Y.Z` pushes it to
+`ghcr.io/maximilianbraun/provider-matomo`.
+
 ## Testing
 
 Unit tests (no Matomo needed):

@@ -1,7 +1,14 @@
-apiVersion: meta.pkg.crossplane.io/v1
+apiVersion: meta.pkg.crossplane.io/v1alpha1
 kind: Provider
 metadata:
   name: provider-matomo
+  annotations:
+    meta.crossplane.io/maintainer: Max Braun
+    meta.crossplane.io/source: github.com/maximilianbraun/provider-matomo
+    meta.crossplane.io/license: Apache-2.0
+    meta.crossplane.io/description: |
+      A Crossplane provider for Matomo analytics — manages Sites, Segments,
+      and app-specific auth Tokens via the Matomo Reporting API.
 spec:
-  controller:
-    image: ghcr.io/maximilianbraun/provider-matomo-controller:latest
+  capabilities:
+    - safe-start
