@@ -34,7 +34,7 @@ See [`examples/`](examples/) for `ProviderConfig`, `Site`, `Segment`, and
 Uses the standard Crossplane build system (the `build/` git submodule):
 
 ```sh
-git clone --recurse-submodules https://github.com/maximilianbraun/provider-matomo
+git clone --recurse-submodules https://github.com/maximilianbraun/crossplane-provider-matomo
 # or, if already cloned: make submodules
 
 make generate     # CRDs + deepcopy + managed-resource methods

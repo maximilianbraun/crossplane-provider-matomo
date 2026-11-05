@@ -14,8 +14,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/maximilianbraun/provider-matomo/apis/v1alpha1"
-	"github.com/maximilianbraun/provider-matomo/internal/clients"
+	"github.com/maximilianbraun/crossplane-provider-matomo/apis/v1alpha1"
+	"github.com/maximilianbraun/crossplane-provider-matomo/internal/clients"
 )
 
 type caller interface {

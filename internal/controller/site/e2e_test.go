@@ -12,8 +12,8 @@ import (
 	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/maximilianbraun/provider-matomo/apis/v1alpha1"
-	"github.com/maximilianbraun/provider-matomo/internal/clients"
+	"github.com/maximilianbraun/crossplane-provider-matomo/apis/v1alpha1"
+	"github.com/maximilianbraun/crossplane-provider-matomo/internal/clients"
 )
 
 func e2eExternal(t *testing.T) *external {

@@ -1,7 +1,10 @@
 # ====================================================================================
 # Setup Project
+# Package/image name stays provider-matomo; the repo + Go module are prefixed
+# crossplane- (matching crossplane-provider-concourse), so PROJECT_REPO is set
+# explicitly rather than derived from PROJECT_NAME.
 PROJECT_NAME := provider-matomo
-PROJECT_REPO := github.com/maximilianbraun/$(PROJECT_NAME)
+PROJECT_REPO := github.com/maximilianbraun/crossplane-provider-matomo
 
 PLATFORMS ?= linux_amd64 linux_arm64
 -include build/makelib/common.mk

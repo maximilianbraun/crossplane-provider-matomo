@@ -6,7 +6,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/providerconfig"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 
-	providerv1alpha1 "github.com/maximilianbraun/provider-matomo/apis/v1alpha1"
+	providerv1alpha1 "github.com/maximilianbraun/crossplane-provider-matomo/apis/v1alpha1"
 )
 
 // Setup wires the ProviderConfig usage-tracking reconciler.
